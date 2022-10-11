@@ -43,7 +43,6 @@ export class UsersService {
         active: USER_STATUS.ACTIVE,
         created: new Date().getTime(),
       };
-
       const createUser = new this.userModel(params);
       await createUser.save();
       return await this.findOne(createUser._id);

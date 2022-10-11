@@ -33,6 +33,7 @@ export class CupService {
         _id: new mongoose.Types.ObjectId(),
         title: createCupDto.title,
         description: createCupDto.description,
+        category: createCupDto.category,
         active: CUP_STATUS.ACTIVE,
         playCount: 0,
         created: new Date().getTime(),
@@ -48,17 +49,20 @@ export class CupService {
 
   async updateCup(
     _id: string,
-    title: string,
-    description: string,
+    body: { title: string; description: string; category: string },
   ): Promise<Cup | undefined> {
     const filter = {
       _id: new mongoose.Types.ObjectId(_id),
     };
-    const set = { title, description };
-    const d = await this.cupModel.findOneAndUpdate(filter, set, {
+    const { title, description, category } = body;
+    const set = {
+      title,
+      description,
+      category,
+    };
+    await this.cupModel.findOneAndUpdate(filter, set, {
       new: true,
     });
-    console.log(d);
     return await this.cupModel.findOneAndUpdate(filter, set, {
       new: true,
     });

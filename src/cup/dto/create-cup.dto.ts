@@ -11,6 +11,9 @@ export class CreateCupDto {
   @IsString()
   readonly description: string;
 
+  @IsString()
+  readonly category: string;
+
   @IsNumber()
   readonly playCount: number;
 

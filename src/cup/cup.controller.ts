@@ -25,14 +25,15 @@ export class CupController {
   @UseGuards(JwtAuthGuard)
   @Post('/:_id')
   async updateCup(@Param() param, @Body() body): Promise<Cup> {
+    console.log('update cup');
     const { _id } = param;
-    const { title, description } = body;
-    return await this.cupService.updateCup(_id, title, description);
+    return await this.cupService.updateCup(_id, body);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('/:_id')
   async getCup(@Param() param): Promise<Cup> {
+    console.log('get cup');
     const { _id } = param;
     return await this.cupService.getCup(_id);
   }

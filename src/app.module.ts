@@ -7,18 +7,30 @@ import { UsersModule } from './users/users.module';
 import { VersionController } from './version/version.controller';
 import { CupController } from './cup/cup.controller';
 import { CupModule } from './cup/cup.module';
-
-const mongodbURL = process.env.mongodbURL || 'mongodb://localhost/realcup';
-console.log(`mongodb connect url: ${mongodbURL}`);
+import { CategoryController } from './category/category.controller';
+import { CategoryModule } from './category/category.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(mongodbURL),
+    ConfigModule.forRoot({
+      envFilePath: `.env.${process.env.NODE_ENV}`,
+      isGlobal: true,
+    }),
+    MongooseModule.forRoot(
+      process.env.MONGODB_URL || 'mongodb://localhost/realcup',
+    ),
     AuthModule,
     UsersModule,
     CupModule,
+    CategoryModule,
   ],
-  controllers: [AppController, VersionController, CupController],
+  controllers: [
+    AppController,
+    VersionController,
+    CupController,
+    CategoryController,
+  ],
   providers: [AppService],
 })
 export class AppModule {}
