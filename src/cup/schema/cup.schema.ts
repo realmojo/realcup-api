@@ -19,6 +19,9 @@ export class Cup {
   @Prop()
   playCount: number;
 
+  // @Prop()
+  // images: mongoose.Types.Array;
+
   @Prop()
   status: CUP_STATUS;
 

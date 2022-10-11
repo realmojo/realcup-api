@@ -27,24 +27,24 @@ export class CupService {
   }
 
   async addCup(createCupDto: CreateCupDto): Promise<Cup | undefined> {
-    const Cup = await this.findOneByTitle(createCupDto.title);
-    if (Cup === null) {
-      const params = {
-        _id: new mongoose.Types.ObjectId(),
-        title: createCupDto.title,
-        description: createCupDto.description,
-        category: createCupDto.category,
-        active: CUP_STATUS.ACTIVE,
-        playCount: 0,
-        created: new Date().getTime(),
-      };
+    // const Cup = await this.findOneByTitle(createCupDto.title);
+    // if (Cup === null) {
+    const params = {
+      _id: new mongoose.Types.ObjectId(),
+      title: createCupDto.title,
+      description: createCupDto.description,
+      category: createCupDto.category,
+      active: CUP_STATUS.ACTIVE,
+      playCount: 0,
+      created: new Date().getTime(),
+    };
 
-      const createCup = new this.cupModel(params);
-      const data = await createCup.save();
-      return data;
-    } else {
-      throw new BadRequestException('이미 등록된 제목 입니다.');
-    }
+    const createCup = new this.cupModel(params);
+    const data = await createCup.save();
+    return data;
+    // } else {
+    //   throw new BadRequestException('이미 등록된 제목 입니다.');
+    // }
   }
 
   async updateCup(

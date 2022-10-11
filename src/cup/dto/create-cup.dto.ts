@@ -17,6 +17,9 @@ export class CreateCupDto {
   @IsNumber()
   readonly playCount: number;
 
+  @IsNumber()
+  readonly images: object;
+
   @IsString()
   readonly status: string;
 
