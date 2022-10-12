@@ -27,7 +27,7 @@ export class CupService {
   }
 
   async getCupList({ category, page }): Promise<Cup[] | undefined> {
-    const limit = 2;
+    const limit = 10;
     const skip = limit * (page - 1);
     if (category === 'all') {
       return await this.cupModel

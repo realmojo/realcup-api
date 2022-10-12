@@ -50,7 +50,7 @@ export class CupController {
     return await this.cupService.patchCupImages(_id, images);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('/list')
   async getCupList(@Query() query): Promise<Cup[] | []> {
     console.log('get cup list');
@@ -63,7 +63,7 @@ export class CupController {
     return await this.cupService.getCupList(params);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('/:_id')
   async getCup(@Param() param): Promise<Cup> {
     console.log('get cup');
