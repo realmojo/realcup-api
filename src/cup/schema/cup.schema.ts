@@ -6,6 +6,16 @@ import { CUP_STATUS } from './constant';
 export type CupDocument = Cup & Document;
 
 @Schema()
+export class Images {
+  @Prop()
+  name: string;
+
+  @Prop()
+  url: string;
+}
+const ImagesSchema = SchemaFactory.createForClass(Images);
+
+@Schema()
 export class Cup {
   @Prop()
   _id: mongoose.Types.ObjectId;
@@ -19,8 +29,8 @@ export class Cup {
   @Prop()
   playCount: number;
 
-  // @Prop()
-  // images: mongoose.Types.Array;
+  @Prop({ type: [ImagesSchema] })
+  images: Images[];
 
   @Prop()
   status: CUP_STATUS;

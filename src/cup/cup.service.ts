@@ -26,6 +26,24 @@ export class CupService {
     return cup;
   }
 
+  async getCupList({ category, page }): Promise<Cup[] | undefined> {
+    const limit = 2;
+    const skip = limit * (page - 1);
+    if (category === 'all') {
+      return await this.cupModel
+        .find({ status: CUP_STATUS.ACTIVE })
+        .sort({ playCount: -1 })
+        .skip(skip)
+        .limit(limit);
+    } else {
+      return await this.cupModel
+        .find({ category, status: CUP_STATUS.ACTIVE })
+        .sort({ playCount: -1 })
+        .skip(skip)
+        .limit(limit);
+    }
+  }
+
   async addCup(createCupDto: CreateCupDto): Promise<Cup | undefined> {
     // const Cup = await this.findOneByTitle(createCupDto.title);
     // if (Cup === null) {
@@ -34,7 +52,7 @@ export class CupService {
       title: createCupDto.title,
       description: createCupDto.description,
       category: createCupDto.category,
-      active: CUP_STATUS.ACTIVE,
+      status: CUP_STATUS.WAIT,
       playCount: 0,
       created: new Date().getTime(),
     };
@@ -47,7 +65,7 @@ export class CupService {
     // }
   }
 
-  async updateCup(
+  async patchCup(
     _id: string,
     body: { title: string; description: string; category: string },
   ): Promise<Cup | undefined> {
@@ -60,9 +78,31 @@ export class CupService {
       description,
       category,
     };
-    await this.cupModel.findOneAndUpdate(filter, set, {
+    return await this.cupModel.findOneAndUpdate(filter, set, {
       new: true,
     });
+  }
+
+  async patchCupStatus(_id: string, status: string): Promise<Cup | undefined> {
+    const filter = {
+      _id: new mongoose.Types.ObjectId(_id),
+    };
+    const set = {
+      status,
+    };
+    console.log(filter, set);
+    return await this.cupModel.findOneAndUpdate(filter, set, {
+      new: true,
+    });
+  }
+
+  async patchCupImages(_id: string, images: object): Promise<Cup | undefined> {
+    const filter = {
+      _id: new mongoose.Types.ObjectId(_id),
+    };
+    const set = {
+      images,
+    };
     return await this.cupModel.findOneAndUpdate(filter, set, {
       new: true,
     });
