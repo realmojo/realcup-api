@@ -7,6 +7,11 @@ export type CupDocument = Cup & Document;
 
 @Schema()
 export class Images {
+  @Prop({
+    default: 0,
+  })
+  winnerCount: number;
+
   @Prop()
   name: string;
 
@@ -26,19 +31,25 @@ export class Cup {
   @Prop()
   description: string;
 
-  @Prop()
+  @Prop({
+    default: 0,
+  })
   playCount: number;
 
   @Prop({ type: [ImagesSchema] })
   images: Images[];
 
-  @Prop()
+  @Prop({
+    default: CUP_STATUS.WAIT,
+  })
   status: CUP_STATUS;
 
   @Prop()
   category: CONSTANT_CATEGORY;
 
-  @Prop()
+  @Prop({
+    default: new Date().getTime(),
+  })
   created: number;
 }
 

@@ -15,10 +15,14 @@ export class User {
   @Prop()
   password: string;
 
-  @Prop()
+  @Prop({
+    default: USER_STATUS.ACTIVE,
+  })
   status: USER_STATUS;
 
-  @Prop()
+  @Prop({
+    default: new Date().getTime(),
+  })
   created: number;
 }
 

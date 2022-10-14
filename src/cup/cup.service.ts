@@ -52,9 +52,6 @@ export class CupService {
       title: createCupDto.title,
       description: createCupDto.description,
       category: createCupDto.category,
-      status: CUP_STATUS.WAIT,
-      playCount: 0,
-      created: new Date().getTime(),
     };
 
     const createCup = new this.cupModel(params);
@@ -78,6 +75,25 @@ export class CupService {
       description,
       category,
     };
+    return await this.cupModel.findOneAndUpdate(filter, set, {
+      new: true,
+    });
+  }
+
+  async patchCupPlayCount(_id: string): Promise<Cup | undefined> {
+    // const item = await this.getCup(_id);
+
+    const filter = {
+      _id: new mongoose.Types.ObjectId(_id),
+    };
+
+    const set = {
+      $inc: {
+        playCount: 1,
+      },
+      // playCount: ++item.playCount,
+    };
+
     return await this.cupModel.findOneAndUpdate(filter, set, {
       new: true,
     });

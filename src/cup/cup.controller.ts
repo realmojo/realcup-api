@@ -43,7 +43,7 @@ export class CupController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('/:_id/images')
-  async updateCupImages(@Param() param, @Body() body): Promise<Cup> {
+  async patchCupImages(@Param() param, @Body() body): Promise<Cup> {
     console.log('patch cup images');
     const { _id } = param;
     const { images } = body;
@@ -67,6 +67,7 @@ export class CupController {
   async getCup(@Param() param): Promise<Cup> {
     console.log('get cup');
     const { _id } = param;
+    await this.cupService.patchCupPlayCount(_id);
     return await this.cupService.getCup(_id);
   }
 }

@@ -40,8 +40,6 @@ export class UsersService {
         _id: new mongoose.Types.ObjectId(),
         email: createUserDto.email,
         password: bcrypt.hashSync(createUserDto.password, 10),
-        active: USER_STATUS.ACTIVE,
-        created: new Date().getTime(),
       };
       const createUser = new this.userModel(params);
       await createUser.save();
