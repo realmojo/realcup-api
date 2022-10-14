@@ -59,7 +59,6 @@ export class CupController {
       category: category || 'all',
       page: Number(page) || 1,
     };
-    console.log(params);
     return await this.cupService.getCupList(params);
   }
 

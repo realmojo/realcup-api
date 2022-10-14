@@ -90,7 +90,6 @@ export class CupService {
     const set = {
       status,
     };
-    console.log(filter, set);
     return await this.cupModel.findOneAndUpdate(filter, set, {
       new: true,
     });
