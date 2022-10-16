@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "name": "realcup-api",
+  "env": {
+    "MONGODB_URL": "@MONGODB_URL"
+  },
+  "builds": [
+    {
+      "src": "dist/main.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "dist/main.ts",
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    }
+  ]
+}
