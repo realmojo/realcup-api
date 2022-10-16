@@ -6,6 +6,9 @@ export class CreateCupDto {
   readonly _id: mongoose.Types.ObjectId;
 
   @IsString()
+  readonly _userId: string;
+
+  @IsString()
   readonly title: string;
 
   @IsString()

@@ -17,6 +17,9 @@ export class Images {
 
   @Prop()
   url: string;
+
+  @Prop()
+  _id: string;
 }
 const ImagesSchema = SchemaFactory.createForClass(Images);
 
@@ -24,6 +27,9 @@ const ImagesSchema = SchemaFactory.createForClass(Images);
 export class Cup {
   @Prop()
   _id: mongoose.Types.ObjectId;
+
+  @Prop()
+  _userId: string;
 
   @Prop()
   title: string;
@@ -47,9 +53,7 @@ export class Cup {
   @Prop()
   category: CONSTANT_CATEGORY;
 
-  @Prop({
-    default: new Date().getTime(),
-  })
+  @Prop()
   created: number;
 }
 

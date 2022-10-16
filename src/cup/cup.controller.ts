@@ -19,9 +19,10 @@ export class CupController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/')
-  async addCup(@Body() body): Promise<Cup> {
+  async addCup(@Body() body, @Request() req): Promise<Cup> {
     console.log('add cup');
-    return await this.cupService.addCup(body);
+    const { id } = req.user;
+    return await this.cupService.addCup({ ...body, _userId: id });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -50,7 +51,13 @@ export class CupController {
     return await this.cupService.patchCupImages(_id, images);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @Patch('/:_id/images/:_imageId')
+  async patchCupImageWinnerCount(@Param() param): Promise<Cup> {
+    console.log('patchCupImageWinnerCount');
+    const { _id, _imageId } = param;
+    return await this.cupService.patchCupImageWinnerCount(_id, _imageId);
+  }
+
   @Get('/list')
   async getCupList(@Query() query): Promise<Cup[] | []> {
     console.log('get cup list');
@@ -62,12 +69,23 @@ export class CupController {
     return await this.cupService.getCupList(params);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
+  @Get('/myList')
+  async getMyCupList(@Request() req): Promise<Cup[] | []> {
+    console.log('get cup my list');
+    const { id } = req.user;
+    return await this.cupService.getMyCupList(id);
+  }
+
   @Get('/:_id')
-  async getCup(@Param() param): Promise<Cup> {
+  async getCup(@Param() param, @Query() query): Promise<Cup> {
     console.log('get cup');
     const { _id } = param;
-    await this.cupService.patchCupPlayCount(_id);
+    const { isPlay } = query;
+
+    if (isPlay) {
+      await this.cupService.patchCupPlayCount(_id);
+    }
     return await this.cupService.getCup(_id);
   }
 }

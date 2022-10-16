@@ -10,6 +10,8 @@ import { CupModule } from './cup/cup.module';
 import { CategoryController } from './category/category.controller';
 import { CategoryModule } from './category/category.module';
 import { ConfigModule } from '@nestjs/config';
+import { CommentController } from './comment/comment.controller';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -24,12 +26,14 @@ import { ConfigModule } from '@nestjs/config';
     UsersModule,
     CupModule,
     CategoryModule,
+    CommentModule,
   ],
   controllers: [
     AppController,
     VersionController,
     CupController,
     CategoryController,
+    CommentController,
   ],
   providers: [AppService],
 })

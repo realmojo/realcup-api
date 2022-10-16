@@ -20,9 +20,7 @@ export class User {
   })
   status: USER_STATUS;
 
-  @Prop({
-    default: new Date().getTime(),
-  })
+  @Prop()
   created: number;
 }
 

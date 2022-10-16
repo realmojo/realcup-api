@@ -30,6 +30,7 @@ export class AuthService {
         password: param.password,
       };
       return {
+        userId: user._id,
         access_token: this.jwtService.sign(payload, {
           expiresIn: `${86400 * 7}s`,
         }),

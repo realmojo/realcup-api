@@ -1,5 +1,5 @@
 import mongoose, { Model } from 'mongoose';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cup, CupDocument } from './schema/cup.schema';
 import { CreateCupDto } from './dto/create-cup.dto';
@@ -44,14 +44,20 @@ export class CupService {
     }
   }
 
+  async getMyCupList(userId): Promise<Cup[] | undefined> {
+    return await this.cupModel.find({ userId }).sort({ created: -1 });
+  }
+
   async addCup(createCupDto: CreateCupDto): Promise<Cup | undefined> {
     // const Cup = await this.findOneByTitle(createCupDto.title);
     // if (Cup === null) {
     const params = {
       _id: new mongoose.Types.ObjectId(),
+      _userId: createCupDto._userId,
       title: createCupDto.title,
       description: createCupDto.description,
       category: createCupDto.category,
+      created: new Date().getTime(),
     };
 
     const createCup = new this.cupModel(params);
@@ -81,8 +87,6 @@ export class CupService {
   }
 
   async patchCupPlayCount(_id: string): Promise<Cup | undefined> {
-    // const item = await this.getCup(_id);
-
     const filter = {
       _id: new mongoose.Types.ObjectId(_id),
     };
@@ -118,6 +122,30 @@ export class CupService {
     const set = {
       images,
     };
+    return await this.cupModel.findOneAndUpdate(filter, set, {
+      new: true,
+    });
+  }
+
+  async patchCupImageWinnerCount(
+    _id: string,
+    _imageId: string,
+  ): Promise<Cup | undefined> {
+    const item = await this.getCup(_id);
+
+    const filter = {
+      _id: new mongoose.Types.ObjectId(_id),
+    };
+
+    const index = item.images.findIndex((imageItem) => {
+      return imageItem._id === _imageId;
+    });
+    item.images[index].winnerCount += 1;
+
+    const set = {
+      images: item.images,
+    };
+
     return await this.cupModel.findOneAndUpdate(filter, set, {
       new: true,
     });
