@@ -12,7 +12,7 @@
     "start": "nest start",
     "dev": "cross-env NODE_ENV=dev nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "corss-env ENV=development PORT=8080 pm2 start dist/main",
+    "start:prod": "corss-env ENV=production PORT=8080 pm2 start dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
