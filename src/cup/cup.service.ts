@@ -44,8 +44,8 @@ export class CupService {
     }
   }
 
-  async getMyCupList(userId): Promise<Cup[] | undefined> {
-    return await this.cupModel.find({ userId }).sort({ created: -1 });
+  async getMyCupList(_userId): Promise<Cup[] | undefined> {
+    return await this.cupModel.find({ _userId }).sort({ created: -1 });
   }
 
   async addCup(createCupDto: CreateCupDto): Promise<Cup | undefined> {
