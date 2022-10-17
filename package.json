@@ -13,6 +13,7 @@
     "dev": "cross-env NODE_ENV=dev nest start --watch",
     "start:debug": "nest start --debug --watch",
     "build:prod": "cross-env NODE_ENV=production nest build",
+    "prestart:prod": "pm2 stop \"realcup-api\" && pm2 delete \"realcup-api\"",
     "start:prod": "cross-env NODE_ENV=production PORT=8080 pm2 start --name \"realcup-api\" dist/main.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
