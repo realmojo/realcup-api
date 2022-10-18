@@ -87,8 +87,7 @@ export class CupService {
 
     console.log('sitemap add title: ', createCupDto.title);
     const p = process.env.NODE_ENV === 'production' ? '/opt' : '.';
-    const f =
-      process.env.NODE_ENV === 'production' ? '/phonebookup/public' : '';
+    const f = process.env.NODE_ENV === 'production' ? '/realcup/public' : '';
     const json = fs.readFileSync(`${p}/sitemap.json`, 'utf8');
     const d = JSON.parse(json);
 
