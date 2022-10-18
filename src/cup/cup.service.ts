@@ -4,7 +4,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Cup, CupDocument } from './schema/cup.schema';
 import { CreateCupDto } from './dto/create-cup.dto';
 import { CUP_STATUS } from './schema/constant';
-
+import { google } from 'googleapis';
+import request from 'request';
+const jwtClient = new google.auth.JWT(
+  process.env.CLIENT_EMAIL,
+  null,
+  process.env.PRIVATE_KEY,
+  ['https://www.googleapis.com/auth/indexing'],
+  null,
+);
 @Injectable()
 export class CupService {
   constructor(@InjectModel(Cup.name) private cupModel: Model<CupDocument>) {}
@@ -104,12 +112,42 @@ export class CupService {
   }
 
   async patchCupStatus(_id: string, status: string): Promise<Cup | undefined> {
+    const item = await this.findOne(_id);
     const filter = {
       _id: new mongoose.Types.ObjectId(_id),
     };
     const set = {
       status,
     };
+
+    // 구글 인덱싱 처리
+    if (status === CUP_STATUS.ACTIVE) {
+      jwtClient.authorize(function (err, tokens) {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        const options = {
+          url: 'https://indexing.googleapis.com/v3/urlNotifications:publish',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          auth: { bearer: tokens.access_token },
+          json: {
+            url: `https://realcup.co.kr/cup/${item.title.replace(
+              / /,
+              '-',
+            )}/${_id}`,
+            type: 'URL_UPDATED',
+          },
+        };
+        request(options, function (error, response, body) {
+          console.log(body);
+        });
+      });
+    }
+
     return await this.cupModel.findOneAndUpdate(filter, set, {
       new: true,
     });
