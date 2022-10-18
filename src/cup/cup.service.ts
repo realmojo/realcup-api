@@ -94,7 +94,7 @@ export class CupService {
     d.urlset.url.push(
       {
         loc: {
-          _text: `https://realcup.co.kr/${encodeURI(
+          _text: `https://realcup.co.kr/cup/${encodeURI(
             data.title.replace(/ /g, '-'),
           )}/${data._id}`,
         },
