@@ -8,6 +8,9 @@ import { google } from 'googleapis';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { map } from 'rxjs/operators';
+import * as convert from 'xml-js';
+import * as fs from 'fs';
+import * as moment from 'moment';
 
 @Injectable()
 export class CupService {
@@ -81,6 +84,46 @@ export class CupService {
 
     const createCup = new this.cupModel(params);
     const data = await createCup.save();
+
+    console.log('sitemap add title: ', createCupDto.title);
+    const p = process.env.NODE_ENV === 'production' ? '/opt' : '.';
+    const f =
+      process.env.NODE_ENV === 'production' ? '/phonebookup/public' : '';
+    const json = fs.readFileSync(`${p}/sitemap.json`, 'utf8');
+    const d = JSON.parse(json);
+
+    d.urlset.url.push(
+      {
+        loc: {
+          _text: `https://realcup.co.kr/${data.title.replace(/ /g, '-')}/${
+            data._id
+          }`,
+        },
+        lastmod: { _text: moment().format('YYYY-MM-DD') },
+        priority: { _text: '1.0' },
+      },
+      {
+        loc: {
+          _text: `https://realcup.co.kr/rank/${data._id}`,
+        },
+        lastmod: { _text: moment().format('YYYY-MM-DD') },
+        priority: { _text: '1.0' },
+      },
+    );
+
+    const options = { compact: true, ignoreComment: true, spaces: 2 };
+    const result = convert.json2xml(JSON.stringify(d), options);
+    fs.writeFile(`${p}/sitemap.json`, JSON.stringify(d), function (err) {
+      if (err !== null) {
+        console.log('sitemap fail');
+      }
+    });
+    fs.writeFile(`${p}${f}/sitemap.xml`, result, function (err) {
+      if (err !== null) {
+        console.log('sitemap fail');
+      }
+    });
+
     return data;
     // } else {
     //   throw new BadRequestException('이미 등록된 제목 입니다.');

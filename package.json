@@ -32,14 +32,17 @@
     "@nestjs/platform-express": "^9.0.0",
     "bcrypt": "^5.1.0",
     "class-validator": "^0.13.2",
+    "fs": "^0.0.1-security",
     "googleapis": "^108.0.0",
+    "moment": "^2.29.4",
     "mongoose": "^6.6.5",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.2",
     "rimraf": "^3.0.2",
-    "rxjs": "^7.5.7"
+    "rxjs": "^7.5.7",
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",
