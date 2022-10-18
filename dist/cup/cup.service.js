@@ -48,7 +48,7 @@ let CupService = class CupService {
         return cup;
     }
     async getCupList({ category, page }) {
-        const limit = 10;
+        const limit = 12;
         const skip = limit * (page - 1);
         if (category === 'all') {
             return await this.cupModel
