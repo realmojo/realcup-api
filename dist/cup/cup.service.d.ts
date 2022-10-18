@@ -1,9 +1,12 @@
 import { Model } from 'mongoose';
 import { Cup, CupDocument } from './schema/cup.schema';
 import { CreateCupDto } from './dto/create-cup.dto';
+import { ConfigService } from '@nestjs/config';
 export declare class CupService {
     private cupModel;
-    constructor(cupModel: Model<CupDocument>);
+    private readonly config;
+    private jwtClient;
+    constructor(cupModel: Model<CupDocument>, config: ConfigService);
     findOne(_id: string): Promise<Cup | undefined>;
     findOneByTitle(title: string): Promise<Cup | undefined>;
     getCup(_id: string): Promise<Cup | undefined>;

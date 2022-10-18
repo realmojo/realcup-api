@@ -6,16 +6,25 @@ import { CreateCupDto } from './dto/create-cup.dto';
 import { CUP_STATUS } from './schema/constant';
 import { google } from 'googleapis';
 import request from 'request';
-const jwtClient = new google.auth.JWT(
-  process.env.CLIENT_EMAIL,
-  null,
-  process.env.PRIVATE_KEY,
-  ['https://www.googleapis.com/auth/indexing'],
-  null,
-);
+import { ConfigService } from '@nestjs/config';
+
 @Injectable()
 export class CupService {
-  constructor(@InjectModel(Cup.name) private cupModel: Model<CupDocument>) {}
+  private jwtClient;
+  constructor(
+    @InjectModel(Cup.name) private cupModel: Model<CupDocument>,
+    private readonly config: ConfigService,
+  ) {
+    const CLIENT_EMAIL: string = this.config.get<string>('CLIENT_EMAIL');
+    const PRIVATE_KEY: string = this.config.get<string>('PRIVATE_KEY');
+    this.jwtClient = new google.auth.JWT(
+      CLIENT_EMAIL,
+      null,
+      PRIVATE_KEY,
+      ['https://www.googleapis.com/auth/indexing'],
+      null,
+    );
+  }
 
   async findOne(_id: string): Promise<Cup | undefined> {
     return await this.cupModel.findOne({
@@ -122,7 +131,7 @@ export class CupService {
 
     // 구글 인덱싱 처리
     if (status === CUP_STATUS.ACTIVE) {
-      jwtClient.authorize(function (err, tokens) {
+      this.jwtClient.authorize(function (err, tokens) {
         if (err) {
           console.log(err);
           return;

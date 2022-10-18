@@ -19,10 +19,14 @@ const mongoose_2 = require("@nestjs/mongoose");
 const cup_schema_1 = require("./schema/cup.schema");
 const googleapis_1 = require("googleapis");
 const request_1 = require("request");
-const jwtClient = new googleapis_1.google.auth.JWT(process.env.CLIENT_EMAIL, null, process.env.PRIVATE_KEY, ['https://www.googleapis.com/auth/indexing'], null);
+const config_1 = require("@nestjs/config");
 let CupService = class CupService {
-    constructor(cupModel) {
+    constructor(cupModel, config) {
         this.cupModel = cupModel;
+        this.config = config;
+        const CLIENT_EMAIL = this.config.get('CLIENT_EMAIL');
+        const PRIVATE_KEY = this.config.get('PRIVATE_KEY');
+        this.jwtClient = new googleapis_1.google.auth.JWT(CLIENT_EMAIL, null, PRIVATE_KEY, ['https://www.googleapis.com/auth/indexing'], null);
     }
     async findOne(_id) {
         return await this.cupModel.findOne({
@@ -108,7 +112,7 @@ let CupService = class CupService {
             status,
         };
         if (status === "active") {
-            jwtClient.authorize(function (err, tokens) {
+            this.jwtClient.authorize(function (err, tokens) {
                 if (err) {
                     console.log(err);
                     return;
@@ -174,7 +178,8 @@ let CupService = class CupService {
 CupService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_2.InjectModel)(cup_schema_1.Cup.name)),
-    __metadata("design:paramtypes", [mongoose_1.Model])
+    __metadata("design:paramtypes", [mongoose_1.Model,
+        config_1.ConfigService])
 ], CupService);
 exports.CupService = CupService;
 //# sourceMappingURL=cup.service.js.map
