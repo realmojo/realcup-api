@@ -2,11 +2,13 @@ import { Model } from 'mongoose';
 import { Cup, CupDocument } from './schema/cup.schema';
 import { CreateCupDto } from './dto/create-cup.dto';
 import { ConfigService } from '@nestjs/config';
+import { HttpService } from '@nestjs/axios';
 export declare class CupService {
     private cupModel;
     private readonly config;
+    private http;
     private jwtClient;
-    constructor(cupModel: Model<CupDocument>, config: ConfigService);
+    constructor(cupModel: Model<CupDocument>, config: ConfigService, http: HttpService);
     findOne(_id: string): Promise<Cup | undefined>;
     findOneByTitle(title: string): Promise<Cup | undefined>;
     getCup(_id: string): Promise<Cup | undefined>;

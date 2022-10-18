@@ -5,8 +5,9 @@ import { Cup, CupDocument } from './schema/cup.schema';
 import { CreateCupDto } from './dto/create-cup.dto';
 import { CUP_STATUS } from './schema/constant';
 import { google } from 'googleapis';
-import request from 'request';
 import { ConfigService } from '@nestjs/config';
+import { HttpService } from '@nestjs/axios';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class CupService {
@@ -14,6 +15,7 @@ export class CupService {
   constructor(
     @InjectModel(Cup.name) private cupModel: Model<CupDocument>,
     private readonly config: ConfigService,
+    private http: HttpService,
   ) {
     const CLIENT_EMAIL: string = this.config.get<string>('CLIENT_EMAIL');
     const PRIVATE_KEY: string = this.config.get<string>('PRIVATE_KEY');
@@ -130,30 +132,40 @@ export class CupService {
     };
 
     // 구글 인덱싱 처리
+    const http = this.http;
     if (status === CUP_STATUS.ACTIVE) {
-      this.jwtClient.authorize(function (err, tokens) {
+      this.jwtClient.authorize(async (err, tokens) => {
         if (err) {
           console.log(err);
           return;
         }
-        const options = {
-          url: 'https://indexing.googleapis.com/v3/urlNotifications:publish',
-          method: 'POST',
+
+        const requestConfig = {
           headers: {
             'Content-Type': 'application/json',
-          },
-          auth: { bearer: tokens.access_token },
-          json: {
-            url: `https://realcup.co.kr/cup/${item.title.replace(
-              / /,
-              '-',
-            )}/${_id}`,
-            type: 'URL_UPDATED',
+            Authorization: `Bearer ${tokens.access_token}`,
           },
         };
-        request(options, function (error, response, body) {
-          console.log(body);
-        });
+
+        http
+          .post(
+            'https://indexing.googleapis.com/v3/urlNotifications:publish',
+            {
+              url: `https://realcup.co.kr/cup/${item.title.replace(
+                / /g,
+                '-',
+              )}/${_id}`,
+              type: 'URL_UPDATED',
+            },
+            requestConfig,
+          )
+          .pipe(
+            map((res) => {
+              console.log(res.data);
+              return res.data;
+            }),
+          )
+          .toPromise();
       });
     }
 

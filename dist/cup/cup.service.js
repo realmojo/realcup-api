@@ -18,12 +18,14 @@ const common_1 = require("@nestjs/common");
 const mongoose_2 = require("@nestjs/mongoose");
 const cup_schema_1 = require("./schema/cup.schema");
 const googleapis_1 = require("googleapis");
-const request_1 = require("request");
 const config_1 = require("@nestjs/config");
+const axios_1 = require("@nestjs/axios");
+const operators_1 = require("rxjs/operators");
 let CupService = class CupService {
-    constructor(cupModel, config) {
+    constructor(cupModel, config, http) {
         this.cupModel = cupModel;
         this.config = config;
+        this.http = http;
         const CLIENT_EMAIL = this.config.get('CLIENT_EMAIL');
         const PRIVATE_KEY = this.config.get('PRIVATE_KEY');
         this.jwtClient = new googleapis_1.google.auth.JWT(CLIENT_EMAIL, null, PRIVATE_KEY.replace(/"/g, ''), ['https://www.googleapis.com/auth/indexing'], null);
@@ -111,27 +113,29 @@ let CupService = class CupService {
         const set = {
             status,
         };
+        const http = this.http;
         if (status === "active") {
-            this.jwtClient.authorize(function (err, tokens) {
+            this.jwtClient.authorize(async (err, tokens) => {
                 if (err) {
                     console.log(err);
                     return;
                 }
-                const options = {
-                    url: 'https://indexing.googleapis.com/v3/urlNotifications:publish',
-                    method: 'POST',
+                const requestConfig = {
                     headers: {
                         'Content-Type': 'application/json',
-                    },
-                    auth: { bearer: tokens.access_token },
-                    json: {
-                        url: `https://realcup.co.kr/cup/${item.title.replace(/ /, '-')}/${_id}`,
-                        type: 'URL_UPDATED',
+                        Authorization: `Bearer ${tokens.access_token}`,
                     },
                 };
-                (0, request_1.default)(options, function (error, response, body) {
-                    console.log(body);
-                });
+                http
+                    .post('https://indexing.googleapis.com/v3/urlNotifications:publish', {
+                    url: `https://realcup.co.kr/cup/${item.title.replace(/ /g, '-')}/${_id}`,
+                    type: 'URL_UPDATED',
+                }, requestConfig)
+                    .pipe((0, operators_1.map)((res) => {
+                    console.log(res.data);
+                    return res.data;
+                }))
+                    .toPromise();
             });
         }
         return await this.cupModel.findOneAndUpdate(filter, set, {
@@ -179,7 +183,8 @@ CupService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_2.InjectModel)(cup_schema_1.Cup.name)),
     __metadata("design:paramtypes", [mongoose_1.Model,
-        config_1.ConfigService])
+        config_1.ConfigService,
+        axios_1.HttpService])
 ], CupService);
 exports.CupService = CupService;
 //# sourceMappingURL=cup.service.js.map

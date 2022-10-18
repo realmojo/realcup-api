@@ -12,11 +12,15 @@ const mongoose_1 = require("@nestjs/mongoose");
 const cup_service_1 = require("./cup.service");
 const cup_controller_1 = require("./cup.controller");
 const cup_schema_1 = require("./schema/cup.schema");
+const axios_1 = require("@nestjs/axios");
 let CupModule = class CupModule {
 };
 CupModule = __decorate([
     (0, common_1.Module)({
-        imports: [mongoose_1.MongooseModule.forFeature([{ name: cup_schema_1.Cup.name, schema: cup_schema_1.CupSchema }])],
+        imports: [
+            axios_1.HttpModule,
+            mongoose_1.MongooseModule.forFeature([{ name: cup_schema_1.Cup.name, schema: cup_schema_1.CupSchema }]),
+        ],
         providers: [cup_service_1.CupService],
         exports: [cup_service_1.CupService],
         controllers: [cup_controller_1.CupController],
