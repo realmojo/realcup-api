@@ -26,7 +26,7 @@ let CupService = class CupService {
         this.config = config;
         const CLIENT_EMAIL = this.config.get('CLIENT_EMAIL');
         const PRIVATE_KEY = this.config.get('PRIVATE_KEY');
-        this.jwtClient = new googleapis_1.google.auth.JWT(CLIENT_EMAIL, null, PRIVATE_KEY, ['https://www.googleapis.com/auth/indexing'], null);
+        this.jwtClient = new googleapis_1.google.auth.JWT(CLIENT_EMAIL, null, PRIVATE_KEY.replace(/"/g, ''), ['https://www.googleapis.com/auth/indexing'], null);
     }
     async findOne(_id) {
         return await this.cupModel.findOne({

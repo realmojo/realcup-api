@@ -20,7 +20,7 @@ export class CupService {
     this.jwtClient = new google.auth.JWT(
       CLIENT_EMAIL,
       null,
-      PRIVATE_KEY,
+      PRIVATE_KEY.replace(/"/g, ''),
       ['https://www.googleapis.com/auth/indexing'],
       null,
     );
