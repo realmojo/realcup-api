@@ -16,6 +16,7 @@ exports.AppController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("./auth/jwt-auth.guard");
 const auth_service_1 = require("./auth/auth.service");
+const moment = require("moment");
 let AppController = class AppController {
     constructor(authService) {
         this.authService = authService;
@@ -25,6 +26,18 @@ let AppController = class AppController {
     }
     getProfile(req) {
         return req.user;
+    }
+    doThrow(req, query) {
+        const { err } = query;
+        try {
+            if (err) {
+                throw `${new Date().getTime()} / ${moment().format('YYYY-MM-DD HH:mm:ss')} / Error test`;
+            }
+            return req.user;
+        }
+        catch (e) {
+            throw new common_1.HttpException(e, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 };
 __decorate([
@@ -42,6 +55,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AppController.prototype, "getProfile", null);
+__decorate([
+    (0, common_1.Get)('throw'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "doThrow", null);
 AppController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [auth_service_1.AuthService])

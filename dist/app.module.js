@@ -21,6 +21,8 @@ const category_module_1 = require("./category/category.module");
 const config_1 = require("@nestjs/config");
 const comment_controller_1 = require("./comment/comment.controller");
 const comment_module_1 = require("./comment/comment.module");
+const sentry_module_1 = require("./sentry/sentry.module");
+require("@sentry/tracing");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -30,12 +32,18 @@ AppModule = __decorate([
                 envFilePath: `.env.${process.env.NODE_ENV}`,
                 isGlobal: true,
             }),
+            sentry_module_1.SentryModule.forRoot({
+                dsn: process.env.SENTRY_DNS,
+                tracesSampleRate: 1.0,
+                debug: Boolean(process.env.SENTRY_DNS_DEBUG) || true,
+            }),
             mongoose_1.MongooseModule.forRoot(process.env.MONGODB_URL || 'mongodb://localhost/realcup'),
             auth_module_1.AuthModule,
             users_module_1.UsersModule,
             cup_module_1.CupModule,
             category_module_1.CategoryModule,
             comment_module_1.CommentModule,
+            sentry_module_1.SentryModule,
         ],
         controllers: [
             app_controller_1.AppController,

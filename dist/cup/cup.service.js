@@ -69,147 +69,182 @@ let CupService = class CupService {
         return await this.cupModel.find({ _userId }).sort({ created: -1 });
     }
     async addCup(createCupDto) {
-        const params = {
-            _id: new mongoose_1.default.Types.ObjectId(),
-            _userId: createCupDto._userId,
-            title: createCupDto.title,
-            description: createCupDto.description,
-            category: createCupDto.category,
-            created: new Date().getTime(),
-        };
-        const createCup = new this.cupModel(params);
-        const data = await createCup.save();
-        console.log('sitemap add title: ', createCupDto.title);
-        const p = process.env.NODE_ENV === 'production' ? '/opt' : '.';
-        const f = process.env.NODE_ENV === 'production' ? '/realcup/public' : '';
-        const json = fs.readFileSync(`${p}/sitemap.json`, 'utf8');
-        const d = JSON.parse(json);
-        d.urlset.url.push({
-            loc: {
-                _text: `https://realcup.co.kr/cup/${encodeURI(data.title.replace(/ /g, '-'))}/${data._id}`,
-            },
-            lastmod: { _text: moment().format('YYYY-MM-DD') },
-            priority: { _text: '1.0' },
-        }, {
-            loc: {
-                _text: `https://realcup.co.kr/rank/${data._id}`,
-            },
-            lastmod: { _text: moment().format('YYYY-MM-DD') },
-            priority: { _text: '1.0' },
-        });
-        const options = { compact: true, ignoreComment: true, spaces: 2 };
-        const result = convert.json2xml(JSON.stringify(d), options);
-        fs.writeFile(`${p}/sitemap.json`, JSON.stringify(d), function (err) {
-            if (err !== null) {
-                console.log('sitemap fail');
-            }
-        });
-        fs.writeFile(`${p}${f}/sitemap.xml`, result, function (err) {
-            if (err !== null) {
-                console.log('sitemap fail');
-            }
-        });
-        return data;
+        try {
+            const params = {
+                _id: new mongoose_1.default.Types.ObjectId(),
+                _userId: createCupDto._userId,
+                title: createCupDto.title,
+                description: createCupDto.description,
+                category: createCupDto.category,
+                created: new Date().getTime(),
+            };
+            const createCup = new this.cupModel(params);
+            const data = await createCup.save();
+            console.log('sitemap add title: ', createCupDto.title);
+            const p = process.env.NODE_ENV === 'production' ? '/opt' : '.';
+            const f = process.env.NODE_ENV === 'production' ? '/realcup/public' : '';
+            const json = fs.readFileSync(`${p}/sitemap.json`, 'utf8');
+            const d = JSON.parse(json);
+            d.urlset.url.push({
+                loc: {
+                    _text: `https://realcup.co.kr/cup/${encodeURI(data.title.replace(/ /g, '-'))}/${data._id}`,
+                },
+                lastmod: { _text: moment().format('YYYY-MM-DD') },
+                priority: { _text: '1.0' },
+            }, {
+                loc: {
+                    _text: `https://realcup.co.kr/rank/${data._id}`,
+                },
+                lastmod: { _text: moment().format('YYYY-MM-DD') },
+                priority: { _text: '1.0' },
+            });
+            const options = { compact: true, ignoreComment: true, spaces: 2 };
+            const result = convert.json2xml(JSON.stringify(d), options);
+            fs.writeFile(`${p}/sitemap.json`, JSON.stringify(d), function (err) {
+                if (err !== null) {
+                    console.log('sitemap fail');
+                }
+            });
+            fs.writeFile(`${p}${f}/sitemap.xml`, result, function (err) {
+                if (err !== null) {
+                    console.log('sitemap fail');
+                }
+            });
+            return data;
+        }
+        catch (e) {
+            throw new common_1.HttpException(e, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     async patchCup(_id, body) {
-        const filter = {
-            _id: new mongoose_1.default.Types.ObjectId(_id),
-        };
-        const { title, description, category } = body;
-        const set = {
-            title,
-            description,
-            category,
-        };
-        return await this.cupModel.findOneAndUpdate(filter, set, {
-            new: true,
-        });
-    }
-    async patchCupPlayCount(_id) {
-        const filter = {
-            _id: new mongoose_1.default.Types.ObjectId(_id),
-        };
-        const set = {
-            $inc: {
-                playCount: 1,
-            },
-        };
-        return await this.cupModel.findOneAndUpdate(filter, set, {
-            new: true,
-        });
-    }
-    async patchCupStatus(_id, status) {
-        const item = await this.findOne(_id);
-        const filter = {
-            _id: new mongoose_1.default.Types.ObjectId(_id),
-        };
-        const set = {
-            status,
-        };
-        const http = this.http;
-        if (status === "active") {
-            this.jwtClient.authorize(async (err, tokens) => {
-                if (err) {
-                    console.log(err);
-                    return;
-                }
-                const requestConfig = {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${tokens.access_token}`,
-                    },
-                };
-                http
-                    .post('https://indexing.googleapis.com/v3/urlNotifications:publish', {
-                    url: `https://realcup.co.kr/cup/${item.title.replace(/ /g, '-')}/${_id}`,
-                    type: 'URL_UPDATED',
-                }, requestConfig)
-                    .pipe((0, operators_1.map)((res) => {
-                    console.log(res.data);
-                    return res.data;
-                }))
-                    .toPromise();
+        try {
+            const filter = {
+                _id: new mongoose_1.default.Types.ObjectId(_id),
+            };
+            const { title, description, category } = body;
+            const set = {
+                title,
+                description,
+                category,
+            };
+            return await this.cupModel.findOneAndUpdate(filter, set, {
+                new: true,
             });
         }
-        return await this.cupModel.findOneAndUpdate(filter, set, {
-            new: true,
-        });
+        catch (e) {
+            throw new common_1.HttpException(e, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async patchCupPlayCount(_id) {
+        try {
+            const filter = {
+                _id: new mongoose_1.default.Types.ObjectId(_id),
+            };
+            const set = {
+                $inc: {
+                    playCount: 1,
+                },
+            };
+            return await this.cupModel.findOneAndUpdate(filter, set, {
+                new: true,
+            });
+        }
+        catch (e) {
+            throw new common_1.HttpException(e, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async patchCupStatus(_id, status) {
+        try {
+            const item = await this.findOne(_id);
+            const filter = {
+                _id: new mongoose_1.default.Types.ObjectId(_id),
+            };
+            const set = {
+                status,
+            };
+            const http = this.http;
+            if (status === "active") {
+                this.jwtClient.authorize(async (err, tokens) => {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    const requestConfig = {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${tokens.access_token}`,
+                        },
+                    };
+                    http
+                        .post('https://indexing.googleapis.com/v3/urlNotifications:publish', {
+                        url: `https://realcup.co.kr/cup/${item.title.replace(/ /g, '-')}/${_id}`,
+                        type: 'URL_UPDATED',
+                    }, requestConfig)
+                        .pipe((0, operators_1.map)((res) => {
+                        console.log(res.data);
+                        return res.data;
+                    }))
+                        .toPromise();
+                });
+            }
+            return await this.cupModel.findOneAndUpdate(filter, set, {
+                new: true,
+            });
+        }
+        catch (e) {
+            throw new common_1.HttpException(e, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     async patchCupImages(_id, images) {
-        const filter = {
-            _id: new mongoose_1.default.Types.ObjectId(_id),
-        };
-        const set = {
-            images,
-        };
-        return await this.cupModel.findOneAndUpdate(filter, set, {
-            new: true,
-        });
+        try {
+            const filter = {
+                _id: new mongoose_1.default.Types.ObjectId(_id),
+            };
+            const set = {
+                images,
+            };
+            return await this.cupModel.findOneAndUpdate(filter, set, {
+                new: true,
+            });
+        }
+        catch (e) {
+            throw new common_1.HttpException(e, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     async patchCupImageWinnerCount(_id, _imageId) {
-        const item = await this.getCup(_id);
-        const filter = {
-            _id: new mongoose_1.default.Types.ObjectId(_id),
-        };
-        const index = item.images.findIndex((imageItem) => {
-            return imageItem._id === _imageId;
-        });
-        item.images[index].winnerCount += 1;
-        const set = {
-            images: item.images,
-        };
-        return await this.cupModel.findOneAndUpdate(filter, set, {
-            new: true,
-        });
+        try {
+            const item = await this.getCup(_id);
+            const filter = {
+                _id: new mongoose_1.default.Types.ObjectId(_id),
+            };
+            const index = item.images.findIndex((imageItem) => {
+                return imageItem._id === _imageId;
+            });
+            item.images[index].winnerCount += 1;
+            const set = {
+                images: item.images,
+            };
+            return await this.cupModel.findOneAndUpdate(filter, set, {
+                new: true,
+            });
+        }
+        catch (e) {
+            throw new common_1.HttpException(e, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     async removeCup(_id) {
-        const filter = {
-            _id: new mongoose_1.default.Types.ObjectId(_id),
-        };
-        const set = {
-            $set: { active: "delete" },
-        };
-        return await this.cupModel.findByIdAndUpdate(filter, set, { new: true });
+        try {
+            const filter = {
+                _id: new mongoose_1.default.Types.ObjectId(_id),
+            };
+            const set = {
+                $set: { active: "delete" },
+            };
+            return await this.cupModel.findByIdAndUpdate(filter, set, { new: true });
+        }
+        catch (e) {
+            throw new common_1.HttpException(e, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 };
 CupService = __decorate([

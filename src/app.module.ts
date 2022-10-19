@@ -12,12 +12,19 @@ import { CategoryModule } from './category/category.module';
 import { ConfigModule } from '@nestjs/config';
 import { CommentController } from './comment/comment.controller';
 import { CommentModule } from './comment/comment.module';
+import { SentryModule } from './sentry/sentry.module';
+import '@sentry/tracing';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: `.env.${process.env.NODE_ENV}`,
       isGlobal: true,
+    }),
+    SentryModule.forRoot({
+      dsn: process.env.SENTRY_DNS,
+      tracesSampleRate: 1.0,
+      debug: Boolean(process.env.SENTRY_DNS_DEBUG) || true,
     }),
     MongooseModule.forRoot(
       process.env.MONGODB_URL || 'mongodb://localhost/realcup',
@@ -27,6 +34,7 @@ import { CommentModule } from './comment/comment.module';
     CupModule,
     CategoryModule,
     CommentModule,
+    SentryModule,
   ],
   controllers: [
     AppController,

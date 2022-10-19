@@ -27,27 +27,37 @@ let CommentService = class CommentService {
         });
     }
     async getCommentList({ _cupId, page }) {
-        const limit = 3;
-        const skip = limit * (page - 1);
-        return await this.commentModel
-            .find({ _cupId })
-            .sort({ created: -1 })
-            .skip(skip)
-            .limit(limit);
+        try {
+            const limit = 3;
+            const skip = limit * (page - 1);
+            return await this.commentModel
+                .find({ _cupId })
+                .sort({ created: -1 })
+                .skip(skip)
+                .limit(limit);
+        }
+        catch (e) {
+            throw new common_1.HttpException(e, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     async addComment(createCommentDto) {
-        const { _cupId, comment, nickname, winnerName } = createCommentDto;
-        const params = {
-            _id: new mongoose_1.default.Types.ObjectId(),
-            _cupId,
-            comment,
-            nickname,
-            winnerName,
-            created: new Date().getTime(),
-        };
-        const createComment = new this.commentModel(params);
-        const data = await createComment.save();
-        return data;
+        try {
+            const { _cupId, comment, nickname, winnerName } = createCommentDto;
+            const params = {
+                _id: new mongoose_1.default.Types.ObjectId(),
+                _cupId,
+                comment,
+                nickname,
+                winnerName,
+                created: new Date().getTime(),
+            };
+            const createComment = new this.commentModel(params);
+            const data = await createComment.save();
+            return data;
+        }
+        catch (e) {
+            throw new common_1.HttpException(e, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 };
 CommentService = __decorate([

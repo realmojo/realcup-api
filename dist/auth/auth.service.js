@@ -31,32 +31,42 @@ let AuthService = class AuthService {
         this.jwtService = jwtService;
     }
     async validateUser(email, pass) {
-        const user = await this.usersService.findOneByEmail(email);
-        const match = bcrypt.compareSync(pass, user.password);
-        if (user && match) {
-            const { password } = user, result = __rest(user, ["password"]);
-            return result;
+        try {
+            const user = await this.usersService.findOneByEmail(email);
+            const match = bcrypt.compareSync(pass, user.password);
+            if (user && match) {
+                const { password } = user, result = __rest(user, ["password"]);
+                return result;
+            }
+            return null;
         }
-        return null;
+        catch (e) {
+            throw new common_1.HttpException(e, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     async login(param) {
-        const user = await this.usersService.findOneByEmail(param.email);
-        const match = bcrypt.compareSync(param.password, user.password);
-        if (user && match) {
-            const payload = {
-                id: user._id,
-                email: user.email,
-                password: param.password,
-            };
-            return {
-                userId: user._id,
-                access_token: this.jwtService.sign(payload, {
-                    expiresIn: `${86400 * 7}s`,
-                }),
-            };
+        try {
+            const user = await this.usersService.findOneByEmail(param.email);
+            const match = bcrypt.compareSync(param.password, user.password);
+            if (user && match) {
+                const payload = {
+                    id: user._id,
+                    email: user.email,
+                    password: param.password,
+                };
+                return {
+                    userId: user._id,
+                    access_token: this.jwtService.sign(payload, {
+                        expiresIn: `${86400 * 7}s`,
+                    }),
+                };
+            }
+            else {
+                throw new common_1.BadRequestException('아이디 혹은 비밀번호가 일치하지 않습니다.');
+            }
         }
-        else {
-            throw new common_1.BadRequestException('아이디 혹은 비밀번호가 일치하지 않습니다.');
+        catch (e) {
+            throw new common_1.HttpException(e, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 };

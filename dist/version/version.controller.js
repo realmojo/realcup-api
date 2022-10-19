@@ -13,10 +13,15 @@ exports.VersionController = void 0;
 const common_1 = require("@nestjs/common");
 let VersionController = class VersionController {
     async getVersion() {
-        return {
-            version: '1.0',
-            message: 'hi',
-        };
+        try {
+            return {
+                version: '1.0',
+                message: 'hi',
+            };
+        }
+        catch (e) {
+            throw new common_1.HttpException(e, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 };
 __decorate([

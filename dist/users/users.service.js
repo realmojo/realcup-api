@@ -31,31 +31,46 @@ let UsersService = class UsersService {
         return await this.userModel.findOne({ email });
     }
     async getUserByEmail(email) {
-        const user = await this.findOneByEmail(email);
-        return user;
+        try {
+            const user = await this.findOneByEmail(email);
+            return user;
+        }
+        catch (e) {
+            throw new common_1.HttpException(e, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     async getUser(_id) {
-        const user = await this.findOne(_id);
-        return {
-            _id: user._id,
-            email: user.email,
-        };
+        try {
+            const user = await this.findOne(_id);
+            return {
+                _id: user._id,
+                email: user.email,
+            };
+        }
+        catch (e) {
+            throw new common_1.HttpException(e, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     async addUser(createUserDto) {
-        const User = await this.findOneByEmail(createUserDto.email);
-        if (User === null) {
-            const params = {
-                _id: new mongoose_1.default.Types.ObjectId(),
-                email: createUserDto.email,
-                password: bcrypt.hashSync(createUserDto.password, 10),
-                created: new Date().getTime(),
-            };
-            const createUser = new this.userModel(params);
-            await createUser.save();
-            return await this.findOne(createUser._id);
+        try {
+            const User = await this.findOneByEmail(createUserDto.email);
+            if (User === null) {
+                const params = {
+                    _id: new mongoose_1.default.Types.ObjectId(),
+                    email: createUserDto.email,
+                    password: bcrypt.hashSync(createUserDto.password, 10),
+                    created: new Date().getTime(),
+                };
+                const createUser = new this.userModel(params);
+                await createUser.save();
+                return await this.findOne(createUser._id);
+            }
+            else {
+                throw new common_1.BadRequestException('이미 등록된 사용자 입니다.');
+            }
         }
-        else {
-            throw new common_1.BadRequestException('이미 등록된 사용자 입니다.');
+        catch (e) {
+            throw new common_1.HttpException(e, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 };

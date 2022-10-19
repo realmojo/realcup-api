@@ -1,5 +1,5 @@
 import mongoose, { Model } from 'mongoose';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cup, CupDocument } from './schema/cup.schema';
 import { CreateCupDto } from './dto/create-cup.dto';
@@ -71,194 +71,217 @@ export class CupService {
   }
 
   async addCup(createCupDto: CreateCupDto): Promise<Cup | undefined> {
-    // const Cup = await this.findOneByTitle(createCupDto.title);
-    // if (Cup === null) {
-    const params = {
-      _id: new mongoose.Types.ObjectId(),
-      _userId: createCupDto._userId,
-      title: createCupDto.title,
-      description: createCupDto.description,
-      category: createCupDto.category,
-      created: new Date().getTime(),
-    };
+    try {
+      const params = {
+        _id: new mongoose.Types.ObjectId(),
+        _userId: createCupDto._userId,
+        title: createCupDto.title,
+        description: createCupDto.description,
+        category: createCupDto.category,
+        created: new Date().getTime(),
+      };
 
-    const createCup = new this.cupModel(params);
-    const data = await createCup.save();
+      const createCup = new this.cupModel(params);
+      const data = await createCup.save();
 
-    console.log('sitemap add title: ', createCupDto.title);
-    const p = process.env.NODE_ENV === 'production' ? '/opt' : '.';
-    const f = process.env.NODE_ENV === 'production' ? '/realcup/public' : '';
-    const json = fs.readFileSync(`${p}/sitemap.json`, 'utf8');
-    const d = JSON.parse(json);
+      console.log('sitemap add title: ', createCupDto.title);
+      const p = process.env.NODE_ENV === 'production' ? '/opt' : '.';
+      const f = process.env.NODE_ENV === 'production' ? '/realcup/public' : '';
+      const json = fs.readFileSync(`${p}/sitemap.json`, 'utf8');
+      const d = JSON.parse(json);
 
-    d.urlset.url.push(
-      {
-        loc: {
-          _text: `https://realcup.co.kr/cup/${encodeURI(
-            data.title.replace(/ /g, '-'),
-          )}/${data._id}`,
+      d.urlset.url.push(
+        {
+          loc: {
+            _text: `https://realcup.co.kr/cup/${encodeURI(
+              data.title.replace(/ /g, '-'),
+            )}/${data._id}`,
+          },
+          lastmod: { _text: moment().format('YYYY-MM-DD') },
+          priority: { _text: '1.0' },
         },
-        lastmod: { _text: moment().format('YYYY-MM-DD') },
-        priority: { _text: '1.0' },
-      },
-      {
-        loc: {
-          _text: `https://realcup.co.kr/rank/${data._id}`,
+        {
+          loc: {
+            _text: `https://realcup.co.kr/rank/${data._id}`,
+          },
+          lastmod: { _text: moment().format('YYYY-MM-DD') },
+          priority: { _text: '1.0' },
         },
-        lastmod: { _text: moment().format('YYYY-MM-DD') },
-        priority: { _text: '1.0' },
-      },
-    );
+      );
 
-    const options = { compact: true, ignoreComment: true, spaces: 2 };
-    const result = convert.json2xml(JSON.stringify(d), options);
-    fs.writeFile(`${p}/sitemap.json`, JSON.stringify(d), function (err) {
-      if (err !== null) {
-        console.log('sitemap fail');
-      }
-    });
-    fs.writeFile(`${p}${f}/sitemap.xml`, result, function (err) {
-      if (err !== null) {
-        console.log('sitemap fail');
-      }
-    });
+      const options = { compact: true, ignoreComment: true, spaces: 2 };
+      const result = convert.json2xml(JSON.stringify(d), options);
+      fs.writeFile(`${p}/sitemap.json`, JSON.stringify(d), function (err) {
+        if (err !== null) {
+          console.log('sitemap fail');
+        }
+      });
+      fs.writeFile(`${p}${f}/sitemap.xml`, result, function (err) {
+        if (err !== null) {
+          console.log('sitemap fail');
+        }
+      });
 
-    return data;
-    // } else {
-    //   throw new BadRequestException('이미 등록된 제목 입니다.');
-    // }
+      return data;
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   async patchCup(
     _id: string,
     body: { title: string; description: string; category: string },
   ): Promise<Cup | undefined> {
-    const filter = {
-      _id: new mongoose.Types.ObjectId(_id),
-    };
-    const { title, description, category } = body;
-    const set = {
-      title,
-      description,
-      category,
-    };
-    return await this.cupModel.findOneAndUpdate(filter, set, {
-      new: true,
-    });
+    try {
+      const filter = {
+        _id: new mongoose.Types.ObjectId(_id),
+      };
+      const { title, description, category } = body;
+      const set = {
+        title,
+        description,
+        category,
+      };
+      return await this.cupModel.findOneAndUpdate(filter, set, {
+        new: true,
+      });
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   async patchCupPlayCount(_id: string): Promise<Cup | undefined> {
-    const filter = {
-      _id: new mongoose.Types.ObjectId(_id),
-    };
+    try {
+      const filter = {
+        _id: new mongoose.Types.ObjectId(_id),
+      };
 
-    const set = {
-      $inc: {
-        playCount: 1,
-      },
-      // playCount: ++item.playCount,
-    };
+      const set = {
+        $inc: {
+          playCount: 1,
+        },
+        // playCount: ++item.playCount,
+      };
 
-    return await this.cupModel.findOneAndUpdate(filter, set, {
-      new: true,
-    });
+      return await this.cupModel.findOneAndUpdate(filter, set, {
+        new: true,
+      });
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   async patchCupStatus(_id: string, status: string): Promise<Cup | undefined> {
-    const item = await this.findOne(_id);
-    const filter = {
-      _id: new mongoose.Types.ObjectId(_id),
-    };
-    const set = {
-      status,
-    };
+    try {
+      const item = await this.findOne(_id);
+      const filter = {
+        _id: new mongoose.Types.ObjectId(_id),
+      };
+      const set = {
+        status,
+      };
 
-    // 구글 인덱싱 처리
-    const http = this.http;
-    if (status === CUP_STATUS.ACTIVE) {
-      this.jwtClient.authorize(async (err, tokens) => {
-        if (err) {
-          console.log(err);
-          return;
-        }
+      // 구글 인덱싱 처리
+      const http = this.http;
+      if (status === CUP_STATUS.ACTIVE) {
+        this.jwtClient.authorize(async (err, tokens) => {
+          if (err) {
+            console.log(err);
+            return;
+          }
 
-        const requestConfig = {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${tokens.access_token}`,
-          },
-        };
-
-        http
-          .post(
-            'https://indexing.googleapis.com/v3/urlNotifications:publish',
-            {
-              url: `https://realcup.co.kr/cup/${item.title.replace(
-                / /g,
-                '-',
-              )}/${_id}`,
-              type: 'URL_UPDATED',
+          const requestConfig = {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${tokens.access_token}`,
             },
-            requestConfig,
-          )
-          .pipe(
-            map((res) => {
-              console.log(res.data);
-              return res.data;
-            }),
-          )
-          .toPromise();
-      });
-    }
+          };
 
-    return await this.cupModel.findOneAndUpdate(filter, set, {
-      new: true,
-    });
+          http
+            .post(
+              'https://indexing.googleapis.com/v3/urlNotifications:publish',
+              {
+                url: `https://realcup.co.kr/cup/${item.title.replace(
+                  / /g,
+                  '-',
+                )}/${_id}`,
+                type: 'URL_UPDATED',
+              },
+              requestConfig,
+            )
+            .pipe(
+              map((res) => {
+                console.log(res.data);
+                return res.data;
+              }),
+            )
+            .toPromise();
+        });
+      }
+
+      return await this.cupModel.findOneAndUpdate(filter, set, {
+        new: true,
+      });
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   async patchCupImages(_id: string, images: object): Promise<Cup | undefined> {
-    const filter = {
-      _id: new mongoose.Types.ObjectId(_id),
-    };
-    const set = {
-      images,
-    };
-    return await this.cupModel.findOneAndUpdate(filter, set, {
-      new: true,
-    });
+    try {
+      const filter = {
+        _id: new mongoose.Types.ObjectId(_id),
+      };
+      const set = {
+        images,
+      };
+      return await this.cupModel.findOneAndUpdate(filter, set, {
+        new: true,
+      });
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   async patchCupImageWinnerCount(
     _id: string,
     _imageId: string,
   ): Promise<Cup | undefined> {
-    const item = await this.getCup(_id);
+    try {
+      const item = await this.getCup(_id);
 
-    const filter = {
-      _id: new mongoose.Types.ObjectId(_id),
-    };
+      const filter = {
+        _id: new mongoose.Types.ObjectId(_id),
+      };
 
-    const index = item.images.findIndex((imageItem) => {
-      return imageItem._id === _imageId;
-    });
-    item.images[index].winnerCount += 1;
+      const index = item.images.findIndex((imageItem) => {
+        return imageItem._id === _imageId;
+      });
+      item.images[index].winnerCount += 1;
 
-    const set = {
-      images: item.images,
-    };
+      const set = {
+        images: item.images,
+      };
 
-    return await this.cupModel.findOneAndUpdate(filter, set, {
-      new: true,
-    });
+      return await this.cupModel.findOneAndUpdate(filter, set, {
+        new: true,
+      });
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   async removeCup(_id: string): Promise<Cup | undefined> {
-    const filter = {
-      _id: new mongoose.Types.ObjectId(_id),
-    };
-    const set = {
-      $set: { active: CUP_STATUS.DELETE },
-    };
-    return await this.cupModel.findByIdAndUpdate(filter, set, { new: true });
+    try {
+      const filter = {
+        _id: new mongoose.Types.ObjectId(_id),
+      };
+      const set = {
+        $set: { active: CUP_STATUS.DELETE },
+      };
+      return await this.cupModel.findByIdAndUpdate(filter, set, { new: true });
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
